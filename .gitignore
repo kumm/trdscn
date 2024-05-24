@@ -5,3 +5,4 @@ data
 .aws-sam
 target
 *.out
+.env
