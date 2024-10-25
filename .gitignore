@@ -6,3 +6,4 @@ data
 target
 *.out
 .env
+template.yaml
