@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-'pymongo[srv]' = "*"
 python-dotenv = "*"
 binance-futures-connector = "*"
 pytz = "*"
@@ -13,5 +12,4 @@ boto3 = "*"
 [dev-packages]
 
 [requires]
-python_version = "3.11"
-python_full_version = "3.11.5"
+python_version = "3"
