@@ -8,7 +8,7 @@ def add_loader_binance_lambda(template: Template, trdscn_table):
     return template.add_resource(Function(
         "LoaderBinanceLambda",
         Handler="loader_binance.lambda_handler",
-        Runtime="python3.11",
+        Runtime="python3.12",
         CodeUri='functions/loader-binance/',
         MemorySize=128,
         Timeout=900,

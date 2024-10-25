@@ -7,7 +7,7 @@ def add_loader_fmp_lambda(template: Template, trdscn_table):
     return template.add_resource(Function(
         "LoaderFmpLambda",
         Handler="loader_fmp.lambda_handler",
-        Runtime="python3.11",
+        Runtime="python3.12",
         CodeUri='functions/loader-fmp/',
         MemorySize=128,
         Timeout=900,
