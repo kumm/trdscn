@@ -24,7 +24,7 @@ def historical_price_full(
 ) -> typing.Optional[typing.List[typing.Dict]]:
     if type(symbol) is list:
         symbol = ",".join(symbol)
-    path = f"historical-price-full/{symbol}"
+    path = f"historical-price-full/{symbol.replace('.','-')}"
     query_vars = {
         "apikey": apikey,
     }
@@ -73,10 +73,11 @@ def init_chart(symbol_id, from_timestamp):
 def append_to_chart(exchange, rec):
     date = datetime.fromtimestamp(rec['timestamp'])
     symbol_id = f"{exchange}:{rec['symbol']}"
+    strdate = date.strftime('%Y-%m-%d')
     table.put_item(
         Item=dict(
             hash=f"DAILY:{symbol_id}",
-            sort=date.strftime('%Y-%m-%d'),
+            sort=strdate,
             open=str(rec['open']),
             close=str(rec['price']),
             low=str(rec['dayLow']),
@@ -86,9 +87,16 @@ def append_to_chart(exchange, rec):
     )
     table.update_item(
         Key={'hash': 'SYMBOL', 'sort': symbol_id},
-        UpdateExpression="set last_append = :last",
-        ExpressionAttributeValues={':last': int(rec['timestamp'] * 1000)}
+        UpdateExpression="SET last_append = :last, market_cap = :market_cap, avg_vol = :avg_vol, loader = :loader",
+        ExpressionAttributeValues={
+            ':last': int(rec['timestamp'] * 1000),
+            ':market_cap': rec['marketCap'],
+            ':avg_vol': rec['avgVolume'],
+            ':loader': 'FMP'
+        }
     )
+    print(f"Appended to {symbol_id} on {strdate}")
+
 
 
 def get_symbols():
@@ -118,7 +126,7 @@ def load_exchanges(symbols):
         print(f"Loading exchange data for {exchange} ...")
         query_vars = {"apikey": os.environ["FMP_API_KEY"]}
         data = __return_json_v3(path=f"symbol/{exchange}", query_vars=query_vars)
-        m = {k['symbol']: k for k in data}
+        m = {k['symbol'].replace('-', '.'): k for k in data}
         for symbol in symbols:
             if m.get(symbol) is not None:
                 append_to_chart(exchange, m[symbol])
@@ -139,4 +147,5 @@ def lambda_handler(event, context):
 
 
 if __name__ == '__main__':
-    load_history(get_symbols(), 1)
+    all_symbol = get_symbols()
+    load_exchanges(all_symbol[0:2])
