@@ -7,3 +7,4 @@ target
 *.out
 .env
 template.yaml
+requirements.txt
