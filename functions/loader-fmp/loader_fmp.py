@@ -11,9 +11,6 @@ load_dotenv()
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['DDB_TABLE_NAME'])
 
-stock_exchanges = ['NASDAQ', 'NYSE']
-
-
 def historical_price_full(
         apikey: str,
         symbol: typing.Union[str, typing.List],
@@ -107,6 +104,12 @@ def get_symbols():
     all_symbol.extend(
         table.query(
             KeyConditionExpression=Key('hash').eq('SYMBOL') & Key('sort').begins_with('NYSE'),
+            FilterExpression=Attr('active').eq(True)
+        )['Items']
+    )
+    all_symbol.extend(
+        table.query(
+            KeyConditionExpression=Key('hash').eq('SYMBOL') & Key('sort').begins_with('AMEX'),
             FilterExpression=Attr('active').eq(True)
         )['Items']
     )
