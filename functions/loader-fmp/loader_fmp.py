@@ -134,13 +134,16 @@ def load_exchanges(symbols):
             if m.get(symbol) is not None:
                 append_to_chart(exchange, m[symbol])
 
+def map_last_init(rec):
+    l = rec.get('last_init', 0)
+    return 0 if l is None else int(l)
 
 def load_history(symbols, limit):
     sorted_symbols = symbols.copy()
-    sorted_symbols.sort(key=lambda r: int(r.get('last_init', 0)))
+    sorted_symbols.sort(key=lambda r: map_last_init(r))
     for smbl in sorted_symbols[0:limit]:
         print(f"Loading full chart for {smbl['sort']} ...")
-        init_chart(smbl['sort'], int(smbl.get('last_init', 0)))
+        init_chart(smbl['sort'], map_last_init(smbl))
 
 
 def lambda_handler(event, context):
