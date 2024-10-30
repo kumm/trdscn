@@ -172,8 +172,10 @@ def load_history(symbols, limit):
 
 def lambda_handler(event, context):
     all_symbol = get_symbols()
-    load_exchanges(all_symbol)
-    load_history(all_symbol, int(os.environ['CHART_LOAD_LIMIT']))
+    if event['load_exchanges']:
+        load_exchanges(all_symbol)
+    if event['load_chart_count'] > 0:
+        load_history(all_symbol, event['load_chart_count'])
 
 
 if __name__ == '__main__':

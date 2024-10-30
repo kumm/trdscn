@@ -15,8 +15,7 @@ def add_loader_fmp_lambda(template: Template, trdscn_table):
         Environment=Environment(
             Variables={
                 "DDB_TABLE_NAME": Ref(trdscn_table),
-                "FMP_API_KEY": '7QKqNgh9o8Uc7vM1NTOXEWrb7n2cUMWR',
-                "CHART_LOAD_LIMIT": 50
+                "FMP_API_KEY": '7QKqNgh9o8Uc7vM1NTOXEWrb7n2cUMWR'
             }
         ),
         Policies=[Policy(
