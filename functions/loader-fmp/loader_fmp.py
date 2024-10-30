@@ -49,23 +49,47 @@ def init_chart(symbol_id, from_timestamp):
         symbol=symbol_id.split(":")[1],
         from_date=from_date,
     )
+    conflict = {}
     with table.batch_writer() as batch:
+        prev = None
         for i in chart:
-            batch.put_item(Item=dict(
-                hash=f"DAILY:{symbol_id}",
-                sort=i['date'],
-                open=str(i['open']),
-                close=str(i['close']),
-                low=str(i['low']),
-                high=str(i['high']),
-                volume=str(i['volume']),
-            ))
+            if prev is None or i['date'] != prev['date']:
+                batch.put_item(Item=dict(
+                    hash=f"DAILY:{symbol_id}",
+                    sort=i['date'],
+                    open=str(i['open']),
+                    close=str(i['close']),
+                    low=str(i['low']),
+                    high=str(i['high']),
+                    volume=str(i['volume']),
+                ))
+            else:
+                if conflict.get(i['date']) is None:
+                    conflict[i['date']] = []
+                conflict[i['date']].append(prev)
+                conflict[i['date']].append(i)
+                print(f"conflict DAILY:{symbol_id} sort {prev['date']}, ochl {prev['open']} {prev['close']} {prev['high']} {prev['low']}, vol {prev['volume']}")
+                print(f"conflict DAILY:{symbol_id} sort {i['date']}, ochl {i['open']} {i['close']} {i['high']} {i['low']}, vol {i['volume']}")
+            prev = i
     table.update_item(
         Key={'hash': 'SYMBOL', 'sort': symbol_id},
         UpdateExpression="set last_init = :last",
         ExpressionAttributeValues={':last': int(datetime.utcnow().timestamp() * 1000)}
     )
 
+# def merge_conflicts(conflicts, symbol):
+#     for date,l in conflicts:
+#         table.update_item(
+#             Key={'hash': symbol, 'sort': date},
+#             UpdateExpression="set open = :o, close = :c, high = :h, low = :l",
+#             ExpressionAttributeValues={
+#                 ':o' : max(map(lambda r: r['open'])),
+#                 ':c' : max(prev['close'], i['close']),
+#                 ':h' : max(prev['high'], i['high'], prev['open'], i['open'], prev['close'], i['close'], prev['low'], i['low']),
+#                 ':l' : min(prev['low'], i['low']) if min(prev['low'], i['low']) > 0 else max(prev['low'], i['low']),
+#             }
+#         )
+#
 
 def append_to_chart(exchange, rec):
     date = datetime.fromtimestamp(rec['timestamp'])
