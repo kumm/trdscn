@@ -9,9 +9,9 @@ config = dotenv_values(".env")
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(config['DDB_TABLE_NAME'])
 
-group = "RUI"
-csv_file = 'russel1000.csv'
-csv_ticker_col = 1
+group = "SPX"
+csv_file = 'SP500.csv'
+csv_ticker_col = 0
 exchanges = ['NYSE', 'NASDAQ', 'AMEX']
 
 # [
@@ -72,8 +72,6 @@ def import_symbol(exchange, rec, batch_writer):
             'active': True,
             'market_cap': rec['marketCap'],
             'avg_vol': rec['avgVolume'],
-            'last_append': None,
-            'last_init': None,
             'loader': 'FMP',
             'groups': {group}
         })
