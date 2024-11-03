@@ -23,6 +23,9 @@ class BounceSignal(Signal):
     def get_completion_bar_index(self) -> int:
         return self.x
 
+    def get_begin_bar_index(self) -> int:
+        return self.trend_line.start.x
+
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
 

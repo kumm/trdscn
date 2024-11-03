@@ -110,3 +110,11 @@ def list_symbols(begins_with: str = None):
     if begins_with is not None:
         condition = condition & Key('sort').begins_with(begins_with)
     return table.query(KeyConditionExpression=condition, FilterExpression=Attr('active').eq(True))['Items']
+
+
+def list_symbols_for_group(group: str = None):
+    condition = Key('hash').eq('SYMBOL')
+    return table.query(
+        KeyConditionExpression=condition,
+        FilterExpression=Attr('active').eq(True) & Attr('groups').contains(group)
+    )['Items']

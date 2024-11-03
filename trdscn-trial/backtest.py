@@ -9,6 +9,9 @@ class Signal:
     def get_completion_bar_index(self) -> int:
         pass
 
+    def get_begin_bar_index(self) -> int:
+        pass
+
     def show(self, chart_image: ChartImage):
         pass
 

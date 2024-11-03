@@ -38,6 +38,9 @@ class HsSignal(Signal):
     def get_completion_bar_index(self) -> int:
         return self.stop.x
 
+    def get_begin_bar_index(self) -> int:
+        return self.start.x
+
     def show(self, chart_image: ChartImage):
         chart_image.add_polygon(
             self.as_polygon(),

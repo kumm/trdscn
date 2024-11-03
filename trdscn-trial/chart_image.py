@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import plotly.graph_objects as go
 
 from chart_db import Candle
@@ -8,23 +6,25 @@ from chart_geometry import Line, Point
 
 class ChartImage:
     title: str
-    size: int
+    offset: int
+    limit: int
     candles: list[Candle]
     fig: go.Figure
     shapes: list[dict]
     annotations: list[go.layout.Annotation]
     avg_candle_size: float
 
-    def __init__(self, title, candles, size):
+    def __init__(self, title, candles, offset = None, limit = None):
         self.title = title
         self.candles = candles
-        self.size = size
         self.shapes = []
         self.annotations = []
+        self.offset = 0 if offset is None else offset
+        self.limit = len(candles) if limit is None else limit
         self.__init_figure()
 
     def __init_figure(self):
-        visible_candles = self.candles[-self.size:]
+        visible_candles = self.candles[self.offset:self.offset + self.limit]
         candle_sizes = [c.high - c.low for c in visible_candles]
         self.avg_candle_size = sum(candle_sizes) / len(visible_candles)
         self.fig = go.Figure(
@@ -33,10 +33,13 @@ class ChartImage:
                                  high=[c.high for c in visible_candles],
                                  low=[c.low for c in visible_candles],
                                  close=[c.close for c in visible_candles])])
-        self.fig.update_layout(xaxis_rangeslider_visible=False, title={'text': self.title})
+        self.fig.update_layout(
+            xaxis_rangeslider_visible=False if self.limit < 1000 else True,
+            title={'text': self.title}
+        )
 
     def add_vector(self, line: Line, dash: str, color: str, width: int = 1):
-        first_x = max(len(self.candles) - self.size, 0)
+        first_x =self.offset
         last_x = len(self.candles) - 1
         x0 = line.start.x if line.start.x >= first_x else first_x
         self.shapes.append(dict(
@@ -47,7 +50,7 @@ class ChartImage:
         ))
 
     def add_line(self, line: Line, dash: str, color: str, width: int = 1):
-        first_x = max(len(self.candles) - self.size, 0)
+        first_x =self.offset
         x0 = line.start.x if line.start.x >= first_x else first_x
         self.shapes.append(dict(
             x0=self.candles[x0].date, y0=line.y(x0),
